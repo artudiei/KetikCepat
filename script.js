@@ -37,6 +37,8 @@
     timerInterval: null,
     timeElapsed: 0,
     timeLeft: 30,
+    lastActiveTime: 0,
+    isIdlePaused: false,
 
     wpmHistory: [],
     missedChars: {}, // { 'a': 3, 'k': 1 }
@@ -80,6 +82,8 @@
     // Results View
     typingSessionView: document.getElementById('typingSessionView'),
     resultsView: document.getElementById('resultsView'),
+    afkNotice: document.getElementById('afkNotice'),
+    resultsTagText: document.getElementById('resultsTagText'),
     resultNetWpm: document.getElementById('resultNetWpm'),
     resultRawWpm: document.getElementById('resultRawWpm'),
     resultAccuracy: document.getElementById('resultAccuracy'),
@@ -214,7 +218,7 @@
         localStorage.setItem('ketikcepat_cat', state.category);
         updateGlider(dom.categoryGlider, btn);
         loadCategoryTexts(state.category);
-        restartSession();
+        restartSession(true);
       });
       if (btn.dataset.category === state.category) {
         btn.classList.add('active');
@@ -231,7 +235,7 @@
         state.duration = btn.dataset.duration;
         localStorage.setItem('ketikcepat_dur', state.duration);
         updateGlider(dom.durationGlider, btn);
-        restartSession();
+        restartSession(true);
       });
       if (btn.dataset.duration === state.duration) {
         btn.classList.add('active');
@@ -255,25 +259,77 @@
   }
 
   // ==========================================
-  // BANK DATA & PEMILIHAN TEKS
+  // BANK DATA & PENGACAK TEKS / SUSUNAN KATA
   // ==========================================
   function loadCategoryTexts(categoryKey) {
     state.textList = data.texts[categoryKey] || data.texts.akademik || [];
-    state.textIndex = 0;
-    setCurrentText();
+    pickAndRandomizeText();
   }
 
-  function setCurrentText() {
-    if (!state.textList || state.textList.length === 0) return;
-    const current = state.textList[state.textIndex % state.textList.length];
-    state.targetText = current.text;
-    state.textTitle = current.title;
-    if (dom.textTitleDisplay) dom.textTitleDisplay.textContent = current.title;
+  /**
+   * Mengambil teks dari bank kata dan mengacak susunan kalimat/kata
+   * Memastikan setiap tombol "Ulangi" dipencet, teks dan susunannya selalu baru!
+   */
+  function pickAndRandomizeText() {
+    const list = state.textList;
+    if (!list || list.length === 0) return;
+
+    // 1. Pilih indeks teks yang berbeda dari teks yang sedang aktif
+    let newIdx = 0;
+    if (list.length > 1) {
+      do {
+        newIdx = Math.floor(Math.random() * list.length);
+      } while (newIdx === state.textIndex);
+    }
+    state.textIndex = newIdx;
+    const baseTextObj = list[newIdx];
+
+    // 2. Acak susunan kalimat dari teks menggunakan algoritma Fisher-Yates
+    const rawSentences = baseTextObj.text
+      .split(/(?<=[.?!])\s+/)
+      .filter((s) => s.trim().length > 0);
+
+    const shuffledSentences = [...rawSentences];
+    for (let i = shuffledSentences.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffledSentences[i], shuffledSentences[j]] = [shuffledSentences[j], shuffledSentences[i]];
+    }
+
+    // 3. Jika mode berdurasi waktu (15s, 30s, 60s) dan kalimat kurang panjang,
+    // sisipkan kalimat acak dari teks lain dalam kategori yang sama agar variasi kata maksimal
+    if (state.duration !== 'paragraph') {
+      const otherTexts = list.filter((_, idx) => idx !== newIdx);
+      if (otherTexts.length > 0) {
+        const extraText = otherTexts[Math.floor(Math.random() * otherTexts.length)];
+        const extraSentences = extraText.text
+          .split(/(?<=[.?!])\s+/)
+          .filter((s) => s.trim().length > 0);
+        if (extraSentences.length > 0) {
+          shuffledSentences.push(extraSentences[Math.floor(Math.random() * extraSentences.length)]);
+        }
+      }
+    }
+
+    state.targetText = shuffledSentences.join(' ');
+    state.textTitle = baseTextObj.title;
+
+    if (dom.textTitleDisplay) {
+      dom.textTitleDisplay.textContent = baseTextObj.title;
+    }
+
     renderTextToViewport();
   }
 
   function renderTextToViewport() {
     dom.textViewport.innerHTML = '';
+
+    // Pastikan elemen #caret selalu berada di dalam dom.textViewport
+    if (!dom.caret) {
+      dom.caret = document.createElement('div');
+      dom.caret.id = 'caret';
+    }
+    dom.textViewport.appendChild(dom.caret);
+
     charSpanElements = [];
     state.charStatus = new Array(state.targetText.length).fill('pending');
 
@@ -310,30 +366,29 @@
       dom.textViewport.appendChild(wordSpan);
     });
 
-    // Posisikan caret di karakter pertama
+    // Posisikan caret presisi di karakter pertama
     setTimeout(updateCaretPosition, 20);
     updateProgress(0);
     updateNextKeyGuide();
   }
 
   // ==========================================
-  // SMOOTH CARET & AUTO SCROLL
+  // SMOOTH CARET & AUTO SCROLL (Presisi 100%)
   // ==========================================
   function updateCaretPosition() {
     if (!dom.caret || charSpanElements.length === 0) return;
 
+    const viewportRect = dom.textViewport.getBoundingClientRect();
+
     if (state.currentIndex < charSpanElements.length) {
       const targetSpan = charSpanElements[state.currentIndex];
-      const viewportRect = dom.textViewport.getBoundingClientRect();
       const spanRect = targetSpan.getBoundingClientRect();
 
-      // Hitung tinggi kursor proporsional yang presisi dengan tinggi karakter teks
-      const fontSize = parseFloat(window.getComputedStyle(targetSpan).fontSize) || 20;
-      const caretHeight = Math.round(fontSize * 1.25); // Tinggi ideal pas dengan cap-height (~25px)
-      const verticalOffset = Math.round((spanRect.height - caretHeight) / 2);
-
-      const leftPos = spanRect.left - viewportRect.left + dom.textViewport.scrollLeft;
-      const topPos = spanRect.top - viewportRect.top + dom.textViewport.scrollTop + verticalOffset;
+      // Karena #caret sekarang berada tepat di dalam #textViewport (position: relative),
+      // koordinat leftPos & topPos dihitung presisi langsung terhadap textViewport
+      const leftPos = Math.round(spanRect.left - viewportRect.left + dom.textViewport.scrollLeft);
+      const topPos = Math.round(spanRect.top - viewportRect.top + dom.textViewport.scrollTop);
+      const caretHeight = Math.round(spanRect.height);
 
       dom.caret.style.left = `${leftPos}px`;
       dom.caret.style.top = `${topPos}px`;
@@ -350,36 +405,50 @@
     } else if (charSpanElements.length > 0) {
       // Akhir teks
       const lastSpan = charSpanElements[charSpanElements.length - 1];
-      const viewportRect = dom.textViewport.getBoundingClientRect();
       const spanRect = lastSpan.getBoundingClientRect();
 
-      const fontSize = parseFloat(window.getComputedStyle(lastSpan).fontSize) || 20;
-      const caretHeight = Math.round(fontSize * 1.25);
-      const verticalOffset = Math.round((spanRect.height - caretHeight) / 2);
-
-      const leftPos = spanRect.right - viewportRect.left + dom.textViewport.scrollLeft;
-      const topPos = spanRect.top - viewportRect.top + dom.textViewport.scrollTop + verticalOffset;
+      const leftPos = Math.round(spanRect.right - viewportRect.left + dom.textViewport.scrollLeft);
+      const topPos = Math.round(spanRect.top - viewportRect.top + dom.textViewport.scrollTop);
 
       dom.caret.style.left = `${leftPos}px`;
       dom.caret.style.top = `${topPos}px`;
-      dom.caret.style.height = `${caretHeight}px`;
+      dom.caret.style.height = `${Math.round(spanRect.height)}px`;
     }
   }
 
   // ==========================================
-  // SESI PENGETIKAN & TIMER
+  // SESI PENGETIKAN, TIMER & DETEKSI AFK
   // ==========================================
   function startSession() {
     state.isActive = true;
     state.isFinished = false;
     state.timeElapsed = 0;
     state.wpmHistory = [];
+    state.lastActiveTime = Date.now();
+    state.isIdlePaused = false;
 
     const durationInt = parseInt(state.duration, 10);
     state.timeLeft = isNaN(durationInt) ? 0 : durationInt;
 
     clearInterval(state.timerInterval);
     state.timerInterval = setInterval(() => {
+      // DETEKSI AFK (Away From Keyboard):
+      // Jika pengguna tidak menekan tombol selama lebih dari 4 detik saat sesi aktif,
+      // waktu dijeda ("tidak berjalan") agar statistik tidak rusak karena ditinggal.
+      if (state.isActive && !state.isFinished) {
+        const idleDuration = Date.now() - state.lastActiveTime;
+        if (idleDuration > 4000) {
+          state.isIdlePaused = true;
+          if (dom.liveTimerLabel) dom.liveTimerLabel.textContent = 'dijeda (AFK)';
+          return; // Lewati interval detik ini (timer tidak berjalan)
+        } else {
+          state.isIdlePaused = false;
+          if (dom.liveTimerLabel) {
+            dom.liveTimerLabel.textContent = state.duration === 'paragraph' ? 'berjalan' : 'tersisa';
+          }
+        }
+      }
+
       state.timeElapsed++;
 
       // Hitung live WPM
@@ -403,7 +472,11 @@
     }, 1000);
   }
 
-  function restartSession() {
+  /**
+   * Reset sesi latihan.
+   * Parameter randomizeText = true memastikan bank kata diganti dan susunan kata diacak!
+   */
+  function restartSession(randomizeText = true) {
     clearInterval(state.timerInterval);
     state.isActive = false;
     state.isFinished = false;
@@ -411,6 +484,7 @@
     state.timeElapsed = 0;
     state.wpmHistory = [];
     state.missedChars = {};
+    state.isIdlePaused = false;
 
     const durationInt = parseInt(state.duration, 10);
     state.timeLeft = isNaN(durationInt) ? 0 : durationInt;
@@ -424,12 +498,18 @@
     if (dom.liveWpm) dom.liveWpm.textContent = '0';
     if (dom.liveAccuracy) dom.liveAccuracy.textContent = '100%';
 
-    // Tampilkan view pengetikan kembali jika di layar hasil
+    // Sembunyikan layar hasil & tampilkan area pengetikan
     dom.typingSessionView.style.display = 'block';
     dom.resultsView.classList.remove('active');
     dom.textViewport.scrollTop = 0;
 
-    renderTextToViewport();
+    // Ganti kata & acak susunan kalimat
+    if (randomizeText) {
+      pickAndRandomizeText();
+    } else {
+      renderTextToViewport();
+    }
+
     focusTypingArea();
   }
 
@@ -438,17 +518,41 @@
     state.isActive = false;
     state.isFinished = true;
 
-    playSuccessSound();
-
     const correctChars = state.charStatus.filter((s) => s === 'correct').length;
     const incorrectChars = state.charStatus.filter((s) => s === 'incorrect').length;
     const totalChars = state.currentIndex;
     const durationSec = Math.max(1, state.timeElapsed);
     const durationMin = durationSec / 60;
 
+    // ==========================================
+    // VALIDASI STATUS AFK / AWAY FROM KEYBOARD:
+    // Jika pengguna tidak mengetik sama sekali (totalChars < 5 atau 0 karakter benar),
+    // seluruh statistik disetel ke NOL dan TIDAK dimasukkan ke dalam riwayat localStorage.
+    // ==========================================
+    const isAfkOrInvalid = totalChars < 5 || correctChars === 0;
+
+    if (isAfkOrInvalid) {
+      showResultsScreen({
+        isAfk: true,
+        netWpm: 0,
+        rawWpm: 0,
+        accuracy: 0,
+        consistency: 0,
+        correctChars: 0,
+        incorrectChars: 0,
+        totalChars: 0,
+        durationSec: 0,
+        cpm: 0,
+        topMissed: [],
+      });
+      return;
+    }
+
+    playSuccessSound();
+
     const rawWpm = Math.round((totalChars / 5) / durationMin) || 0;
     const netWpm = Math.max(0, Math.round(((correctChars - incorrectChars) / 5) / durationMin)) || 0;
-    const accuracy = totalChars > 0 ? Math.max(0, Math.min(100, Math.round((correctChars / totalChars) * 100))) : 100;
+    const accuracy = totalChars > 0 ? Math.max(0, Math.min(100, Math.round((correctChars / totalChars) * 100))) : 0;
     const cpm = Math.round(totalChars / durationMin) || 0;
 
     // Hitung konsistensi
@@ -460,7 +564,7 @@
       .sort((a, b) => b.count - a.count)
       .slice(0, 5);
 
-    // Simpan ke localStorage (maks 10 riwayat)
+    // Simpan ke localStorage (hanya jika bukan sesi AFK)
     const sessionRecord = {
       id: Date.now().toString(),
       timestamp: new Date().toISOString(),
@@ -483,6 +587,7 @@
 
     // Tampilkan Layar Hasil
     showResultsScreen({
+      isAfk: false,
       netWpm,
       rawWpm,
       accuracy,
@@ -497,11 +602,11 @@
   }
 
   function calculateConsistency(wpmArr) {
-    if (!wpmArr || wpmArr.length < 3) return 100;
+    if (!wpmArr || wpmArr.length < 3) return 0;
     const valid = wpmArr.filter((w) => w > 0);
-    if (valid.length < 2) return 100;
+    if (valid.length < 2) return 0;
     const mean = valid.reduce((acc, curr) => acc + curr, 0) / valid.length;
-    if (mean === 0) return 100;
+    if (mean === 0) return 0;
     const variance = valid.reduce((acc, curr) => acc + Math.pow(curr - mean, 2), 0) / valid.length;
     const stdDev = Math.sqrt(variance);
     const cv = stdDev / mean;
@@ -519,7 +624,6 @@
     function update(now) {
       const elapsed = now - startTime;
       const progress = Math.min(1, elapsed / duration);
-      // Easing out cubic
       const easeOut = 1 - Math.pow(1 - progress, 3);
       const current = Math.round(startVal + (targetVal - startVal) * easeOut);
       element.textContent = `${current}${suffix}`;
@@ -539,8 +643,16 @@
     dom.typingSessionView.style.display = 'none';
     dom.resultsView.classList.add('active');
 
+    // Tampilkan / Sembunyikan banner AFK Notice
+    if (dom.afkNotice) {
+      dom.afkNotice.style.display = res.isAfk ? 'block' : 'none';
+    }
+    if (dom.resultsTagText) {
+      dom.resultsTagText.textContent = res.isAfk ? 'Sesi AFK (Tidak Disimpan)' : 'Sesi Latihan Selesai';
+    }
+
     // Number ticker counters
-    animateCounter(dom.resultNetWpm, res.netWpm, '', 1200);
+    animateCounter(dom.resultNetWpm, res.netWpm, '', 1000);
     animateCounter(dom.resultAccuracy, res.accuracy, '%', 1000);
     animateCounter(dom.resultConsistency, res.consistency, '%', 1000);
 
@@ -551,10 +663,14 @@
     dom.resultTime.textContent = `${res.durationSec}s`;
     dom.resultCpm.textContent = res.cpm;
 
-    // Level Kecepatan (Speed Tier)
+    // Evaluasi Speed Tier
     let tierText = 'Pemula (Developing)';
     let tierColor = '#71717a';
-    if (res.netWpm >= 80) {
+
+    if (res.isAfk) {
+      tierText = 'Tidak Berjalan (AFK)';
+      tierColor = '#ef4444';
+    } else if (res.netWpm >= 80) {
       tierText = 'Master Typist (Ahli)';
       tierColor = '#a855f7';
     } else if (res.netWpm >= 65) {
@@ -567,6 +683,7 @@
       tierText = 'Menengah (Intermediate)';
       tierColor = '#f59e0b';
     }
+
     dom.resultSpeedTier.textContent = tierText;
     dom.resultSpeedTier.style.color = tierColor;
     dom.resultTextInfo.textContent = `Kategori: ${state.category.toUpperCase()} • "${state.textTitle}"`;
@@ -590,11 +707,9 @@
         dom.typoBadgesContainer.appendChild(chip);
       });
     } else {
-      dom.typoBadgesContainer.innerHTML = `
-        <div style="font-size: 0.75rem; color: #10b981; padding: 0.5rem 0;">
-          ✨ Sempurna! Tidak ada kesalahan ketik yang tercatat pada sesi ini.
-        </div>
-      `;
+      dom.typoBadgesContainer.innerHTML = res.isAfk
+        ? `<div style="font-size: 0.75rem; color: #71717a; padding: 0.5rem 0;">Tidak ada pengetikan yang dapat dievaluasi.</div>`
+        : `<div style="font-size: 0.75rem; color: #10b981; padding: 0.5rem 0;">✨ Sempurna! Tidak ada kesalahan ketik yang tercatat pada sesi ini.</div>`;
     }
   }
 
@@ -649,7 +764,6 @@
   }
 
   function updateNextKeyGuide() {
-    // Bersihkan status target sebelumnya
     const prevTargets = dom.keyboardRowsWrap.querySelectorAll('.key.target');
     prevTargets.forEach((k) => k.classList.remove('target'));
 
@@ -672,7 +786,6 @@
       `;
     }
 
-    // Sorot tombol target pada keyboard virtual
     const keys = dom.keyboardRowsWrap.querySelectorAll('.key');
     keys.forEach((keyEl) => {
       const isSpace = nextChar === ' ' && keyEl.dataset.space === 'true';
@@ -710,7 +823,7 @@
   // PENANGANAN INPUT & EVENT KEYDOWN
   // ==========================================
   function handleKeyDown(e) {
-    // Pintasan Cepat: Tab + Enter untuk instant restart
+    // Pintasan Cepat: Tab + Enter untuk instant restart & ubah kata
     if (e.key === 'Tab') {
       e.preventDefault();
       state.tabPressed = true;
@@ -719,7 +832,7 @@
     if (e.key === 'Enter' && state.tabPressed) {
       e.preventDefault();
       state.tabPressed = false;
-      restartSession();
+      restartSession(true);
       return;
     }
     state.tabPressed = false;
@@ -735,6 +848,15 @@
     // Cegah scroll halaman saat menekan spasi
     if (e.key === ' ') {
       e.preventDefault();
+    }
+
+    // Perbarui waktu aktivitas terakhir untuk deteksi AFK
+    state.lastActiveTime = Date.now();
+    if (state.isIdlePaused) {
+      state.isIdlePaused = false;
+      if (dom.liveTimerLabel) {
+        dom.liveTimerLabel.textContent = state.duration === 'paragraph' ? 'berjalan' : 'tersisa';
+      }
     }
 
     // Visual efek tekan tombol
@@ -796,7 +918,6 @@
             ? 'char space-char space-error'
             : 'char incorrect';
         }
-        // Catat huruf yang salah untuk analitik typo
         state.missedChars[expected] = (state.missedChars[expected] || 0) + 1;
       }
 
@@ -858,15 +979,15 @@
       dom.unfocusedOverlay.classList.remove('visible');
     });
 
-    // Tombol Restart
-    dom.btnRestart.addEventListener('click', restartSession);
-    dom.btnRepeatTest.addEventListener('click', restartSession);
+    // Tombol Restart (Ganti kata & acak susunan kata)
+    dom.btnRestart.addEventListener('click', () => restartSession(true));
+    dom.btnRepeatTest.addEventListener('click', () => restartSession(true));
 
     // Tombol Teks Berikutnya
     dom.btnNextText.addEventListener('click', () => {
       state.textIndex++;
-      setCurrentText();
-      restartSession();
+      pickAndRandomizeText();
+      restartSession(false);
     });
 
     // Toggle Suara
@@ -957,7 +1078,6 @@
   }
 
   function renderHistoryContent() {
-    // Render Grafik Batang Tren
     dom.chartBarsWrap.innerHTML = '';
     if (state.history.length === 0) {
       dom.chartBarsWrap.innerHTML = `
@@ -966,7 +1086,6 @@
         </div>
       `;
     } else {
-      // Urutan kronologis dari sesi paling awal ke paling baru
       const chronological = [...state.history].reverse();
       const maxWpm = Math.max(70, ...chronological.map((h) => h.netWpm || 0));
 
@@ -1025,7 +1144,7 @@
         item.netWpm,
         item.rawWpm,
         item.accuracy,
-        item.consistency || 100,
+        item.consistency || 0,
         item.correctChars,
         item.incorrectChars,
       ].join(',');
@@ -1062,4 +1181,3 @@
   // Mulai aplikasi
   document.addEventListener('DOMContentLoaded', init);
 })();
-

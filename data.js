@@ -1,5 +1,6 @@
 // Bank Data Teks Lokal & Akademik Indonesia & Konfigurasi Keyboard 10 Jari
-// Didesain untuk KetikCepat (100% Vanilla JS, kompatibel dengan protokol file:///)
+// Diperkaya dengan minimal 12-14 teks berbobot per kategori + fungsi pengacak susunan kata
+// 100% Client-side murni, kompatibel langsung via file:///
 
 window.TYPING_DATA = {
   categories: [
@@ -46,6 +47,31 @@ window.TYPING_DATA = {
         title: 'Diskusi Hasil & Implikasi Manajerial',
         text: 'Diskusi hasil penelitian mengonfirmasi bahwa kepemimpinan transformasional berkontribusi positif terhadap kinerja inovasi organisasi. Temuan empiris ini memperkuat postulat teori kepemimpinan situasional sekaligus menawarkan implikasi manajerial konkret bagi pengambil kebijakan. Keterbatasan rentang waktu pengamatan membuka peluang eksplorasi lebih komprehensif bagi penelitian longitudinal di masa mendatang.',
       },
+      {
+        id: 'akademik-8',
+        title: 'Paradigma Positivisme dan Hermeneutika',
+        text: 'Perdebatan epistemologis antara paradigma positivistik dan pendekatan hermeneutika memperkaya khazanah metodologis ilmu sosial kontemporer. Jika positivisme berorientasi pada hukum universal dan objektivitas deterministik, hermeneutika menekankan pemaknaan kontekstual dan pemahaman intersubjektif atas tindakan manusia yang sarat nilai budaya.',
+      },
+      {
+        id: 'akademik-9',
+        title: 'Teknik Sampling Probabilitas & Non-Probabilitas',
+        text: 'Penentuan ukuran sampel yang representatif memegang peranan krusial dalam memitigasi kesalahan penarikan sampel atau sampling error. Penggunaan teknik stratified random sampling memastikan setiap subpopulasi terwakili secara proporsional, sementara purposive sampling dipilih apabila riset membutuhkan informan dengan kriteria keahlian spesifik.',
+      },
+      {
+        id: 'akademik-10',
+        title: 'Analisis Jalur dan Pemodelan Persamaan Struktural',
+        text: 'Pemodelan persamaan struktural berbasis kovarians memungkinkan peneliti menguji hubungan struktural kompleks antara variabel laten eksogen dan endogen secara simultan. Evaluasi goodness of fit menggunakan indeks seperti RMSEA dan CFI membuktikan keselarasan model konseptual teoretis dengan matriks kovarians data empiris lapangan.',
+      },
+      {
+        id: 'akademik-11',
+        title: 'Validasi Instrumen & Reliabilitas Komposit',
+        text: 'Uji reliabilitas komposit dan rata-rata varians terekstraksi mengevaluasi konvergensi indikator dalam mengukur konstruk laten yang tidak dapat diamati secara langsung. Pemenuhan kriteria Fornell-Larcker memastikan bahwa korelasi antar variabel laten tidak melampaui akar kuadrat varians masing-masing konstruk teoretis.',
+      },
+      {
+        id: 'akademik-12',
+        title: 'Sistematika Kajian Literatur Naratif dan Meta-Analisis',
+        text: 'Meta-analisis kuantitatif mengombinasikan ukuran efek dari puluhan studi independen untuk memperoleh estimasi parameter populasi yang lebih presisi dan memiliki kekuatan statistik tinggi. Penilaian risiko bias publikasi dengan plot corong menjamin objektivitas sintesis bukti ilmiah sebelum diadopsi ke dalam praktik klinis maupun kebijakan publik.',
+      },
     ],
 
     teknologi: [
@@ -83,6 +109,31 @@ window.TYPING_DATA = {
         id: 'tekno-7',
         title: 'Internet untuk Segala dan Komputasi Tepi',
         text: 'Perkembangan ekosistem Internet of Things mendorong adopsi arsitektur komputasi tepi atau edge computing untuk mengurangi latensi transmisi jaringan. Pemrosesan telemetri sensor langsung pada simpul lokal memungkinkan pengambilan keputusan waktu nyata pada kendaraan otonom, otomasi pabrik cerdas, dan sistem pemantauan lingkungan kritis tanpa ketergantungan penuh pada server awan terpusat.',
+      },
+      {
+        id: 'tekno-8',
+        title: 'Pola Desain Perangkat Lunak dan Refaktorisasi Kode',
+        text: 'Penerapan prinsip SOLID dalam pemrograman berorientasi objek memfasilitasi pemeliharaan kode dan fleksibilitas arsitektur perangkat lunak modular. Pola desain pabrik abstrak, pengamat, dan strategi mengurangi kopling antar modul sekaligus menyederhanakan pembuatan unit tes otomatis dengan cakupan pengujian yang komprehensif.',
+      },
+      {
+        id: 'tekno-9',
+        title: 'Pemrosesan Paralel dan Arsitektur Konkurensi',
+        text: 'Manajemen utas komputasi dan saluran komunikasi asinkron mencegah terjadinya kondisi balapan dan kebuntuan sistem saat memproses ribuan permintaan secara serentak. Model aktor dan mekanisme coroutine menawarkan abstraksi konkurensi yang ringan tanpa membebani overhead memori sistem operasi server.',
+      },
+      {
+        id: 'tekno-10',
+        title: 'Arsitektur Berorientasi Peristiwa & Broker Pesan',
+        text: 'Arsitektur berbasis peristiwa mengisolasi produsen data dari konsumen melalui broker pesan berkinerja tinggi seperti Kafka dan RabbitMQ. Aliran log data yang tidak dapat diubah menjamin ketahanan transmisi informasi dan memungkinkan pemrosesan analitik secara waktu nyata pada kluster terdistribusi berskala petabita.',
+      },
+      {
+        id: 'tekno-11',
+        title: 'Keamanan Rantai Pasok Perangkat Lunak & CI/CD',
+        text: 'Otomasi pipa integrasi berkelanjutan kini mengintegrasikan pemindaian kerentanan kode statis dan analisis komposisi dependensi pihak ketiga secara otomatis. Penandatanganan citra kontainer kriptografis memastikan bahwa hanya artefak biner yang terverifikasi integritasnya yang diizinkan meluncur ke lingkungan produksi.',
+      },
+      {
+        id: 'tekno-12',
+        title: 'Antarmuka Pemrograman Aplikasi RESTful dan GraphQL',
+        text: 'Desain antarmuka pemrograman aplikasi berbasis REST memanfaatkan kata kerja protokol HTTP secara semantik untuk manajemen sumber daya entitas digital. Sebagai alternatif modern, GraphQL memberikan fleksibilitas kepada klien web untuk meminta struktur data spesifik dalam satu perjalanan bolak-balik jaringan guna meminimalkan konsumsi kuota data seluler.',
       },
     ],
 
@@ -122,6 +173,31 @@ window.TYPING_DATA = {
         title: 'Hukum Kontrak Dagang dan Arbitrase',
         text: 'Keabsahan suatu perjanjian perdata mensyaratkan adanya kesepakatan bebas para pihak, kecakapan bertindak menurut hukum, suatu hal tertentu, dan sebab yang halal. Dalam sengketa perniagaan lintas yurisdiksi, klausul arbitrase komersial sering dipilih karena menjamin kerahasiaan proses peradilan serta menghasilkan putusan final dan mengikat yang dapat dieksekusi antarnegara.',
       },
+      {
+        id: 'hukum-8',
+        title: 'Perlindungan Konsumen dan Tanggung Jawab Produk',
+        text: 'Undang-undang perlindungan konsumen mewajibkan pelaku usaha memberikan informasi jujur dan jelas mengenai kondisi serta jaminan barang atau jasa yang diperdagangkan. Klausul baku sepihak yang mengalihkan tanggung jawab hukum produsen kepada konsumen secara sepihak dinyatakan batal demi hukum oleh pengadilan niaga.',
+      },
+      {
+        id: 'hukum-9',
+        title: 'Diversifikasi Portofolio dan Manajemen Risiko Keuangan',
+        text: 'Teori portofolio modern mendalilkan bahwa investor dapat meminimalkan risiko pasar tanpa mengorbankan ekspektasi imbal hasil melalui diversifikasi aset lintas sektor industri. Alokasi modal strategis antara instrumen pendapatan tetap, saham ekuitas berfundamental prima, dan instrumen lindung nilai melindungi nilai modal riil dari ancaman inflasi.',
+      },
+      {
+        id: 'hukum-10',
+        title: 'Pemberantasan Monopoli dan Persaingan Usaha Tidak Sehat',
+        text: 'Komisi Pengawas Persaingan Usaha mengawasi praktik integrasi vertikal dan perjanjian penetapan harga kartel yang berpotensi merugikan kesejahteraan publik. Iklim kompetisi pasar yang adil mendorong efisiensi alokatif serta memacu inovasi produk baru dengan harga yang lebih terjangkau bagi seluruh lapisan konsumen domestik.',
+      },
+      {
+        id: 'hukum-11',
+        title: 'Ketahanan Pangan dan Kedaulatan Agraria',
+        text: 'Kedaulatan pangan nasional mensyaratkan revitalisasi kelembagaan pertanian rakyat dan perlindungan lahan produktif dari alih fungsi lahan komersial yang tidak terkendali. Kebijakan cadangan beras pemerintah dan subsidi pupuk tepat sasaran menjaga stabilitas pasokan pangan sekaligus menjamin kepastian harga dasar di tingkat petani produsen.',
+      },
+      {
+        id: 'hukum-12',
+        title: 'Hukum Lingkungan dan Analisis Dampak AMDAL',
+        text: 'Prinsip pencemar membayar dan asas kehati-hatian dini menjadi norma fundamental dalam hukum perlindungan lingkungan hidup modern. Setiap kegiatan usaha berskala signifikan wajib menyusun dokumen analisis mengenai dampak lingkungan yang komprehensif demi melestarikan fungsi daya dukung ekosistem bagi generasi mendatang.',
+      },
     ],
 
     'sastra-budaya': [
@@ -159,6 +235,31 @@ window.TYPING_DATA = {
         id: 'sastra-7',
         title: 'Arsitektur Vernakular dan Kearifan Ekologis',
         text: 'Rumah adat panggung di berbagai pelosok Nusantara memperlihatkan pemahaman arsitektural yang mendalam terhadap karakteristik iklim tropis dan mitigasi kegempaan. Struktur pasak tanpa paku besi, ventilasi silang yang menyejukkan ruangan, serta penggunaan material ramah lingkungan membuktikan bahwa nenek moyang kita telah mempraktikkan konsep keberlanjutan ekologis berabad-abad silam.',
+      },
+      {
+        id: 'sastra-8',
+        title: 'Metafora Puisi dan Penjelajahan Makna Batin',
+        text: 'Kekuatan sebuah bait puisi bertumpu pada kemampuannya menyingkap keheningan di balik riuh rendah kenyataan kasat mata. Pilihan diksi yang cermat dan ritme persajakan yang mengalun lirih mengajak pembaca meniti lorong perenungan batin, menemukan keindahan yang sublim dalam kesederhanaan peristiwa hidup sehari-hari.',
+      },
+      {
+        id: 'sastra-9',
+        title: 'Jejak Rempah dan Diplomasi Kebudayaan Bahari',
+        text: 'Pelayaran perahu pinisi melintasi samudera luas mengukir sejarah panjang peradaban maritim kepulauan Nusantara sebagai episentrum perdagangan rempah dunia. Pertukaran komoditas cengkih dan pala memicu perjumpaan lintas budaya yang melahirkan akulturasi seni arsitektur, kuliner khas, dan musik tradisional yang lestari hingga hari ini.',
+      },
+      {
+        id: 'sastra-10',
+        title: 'Wayang Kulit dan Filosofi Lakon Pewayangan',
+        text: 'Pertunjukan wayang kulit bukan sekadar tontonan hiburan malam hari, melainkan tuntunan moral yang membedah pertarungan abadi antara kebajikan dan hawa nafsu. Bayang-bayang kelir yang dihidupkan oleh kelihaian sang dalang menyuarakan kritik sosial yang tajam sembari menyajikan wejangan hidup tentang hakikat pengabdian manusia.',
+      },
+      {
+        id: 'sastra-11',
+        title: 'Kearifan Lokal Hutan Adat dan Kosmologi Spiritual',
+        text: 'Masyarakat adat memandang bentang hutan lindung bukan sebagai komoditas eksploitasi ekonomi, melainkan ibu yang menyusui kehidupan seluruh makhluk. Pranata larangan menebang pohon keramat dan upacara sedekah bumi mencerminkan kesadaran spiritual mendalam bahwa perusakan alam niscaya mendatangkan malapetaka bagi peradaban manusia.',
+      },
+      {
+        id: 'sastra-12',
+        title: 'Esai Budaya Kopi dan Ruang Publik Egaliter',
+        text: 'Warung kopi tradisional di beranda kota berfungsi sebagai ruang ketiga yang meruntuhkan sekat hierarki status sosial dan jabatan birokrasi. Secangkir seduhan kopi robusta hangat menemani perbincangan santai seputar isu kebangsaan, seni rupa, dan dinamika kampung, menumbuhkan solidaritas kewargaan yang guyub dan bersahaja.',
       },
     ],
   },
@@ -307,4 +408,3 @@ window.TYPING_DATA = {
     ],
   ],
 };
-

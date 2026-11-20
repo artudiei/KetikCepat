@@ -1,45 +1,42 @@
-# Dokumentasi Produk: KetikCepat (v1.0)
+# Dokumentasi Produk: KetikCepat (v1.1)
 ### Aplikasi Simulasi Latihan Mengetik 10 Jari Berbasis Teks Akademik & Konten Lokal Indonesia
 
 ---
 
-## 1. Ringkasan Eksekutif & Visi Produk
+## 1. Ringkasan Eksekutif & Pembaruan Sistem (v1.1)
 
-**KetikCepat** adalah platform simulasi pengetikan 10 jari modern (*touch-typing platform*) yang dibangun murni di sisi klien (*client-side*). Berbeda dengan simulator pengetikan konvensional yang didominasi oleh kata-kata acak berbahasa Inggris tanpa konteks, KetikCepat dirancang khusus menggunakan **korpus teks akademik, profesional, dan kultural berbahasa Indonesia baku** dengan terminologi tingkat lanjut.
+**KetikCepat** adalah platform simulasi pengetikan 10 jari modern (*touch-typing platform*) yang dibangun murni di sisi klien (*client-side*). Pada versi 1.1, aplikasi mendapatkan pembaruan fundamental berdasarkan umpan balik performa pengguna:
 
-### 🎯 Nilai Utama (Value Proposition)
-1. **Relevansi Kontekstual Tinggi**: Melatih refleks pengetikan pada istilah skripsi, metodologi riset, teknologi informasi, regulasi hukum, makroekonomi, dan esai sastra Indonesia.
-2. **Estetika & Fisika Gerak Modern**: Mengadopsi standar mikro-interaksi komponen interaktif **reactbits.dev** (Spotlight Bento Cards, Blur-Text Reveal, Smooth Caret, Number Ticker, dan Sliding Glider).
-3. **Privasi & Portabilitas 100% (Zero-Backend)**: Seluruh data latihan tersimpan lokal di peramban (`localStorage`) tanpa server luar, tanpa pelacak data, dan dapat langsung dibuka via protokol `file:///` cukup dengan klik dua kali pada berkas `index.html`.
-4. **Metrik Standar Internasional**: Menggunakan algoritma baku *Net WPM* (5 karakter/kata dikurangi penalti kesalahan), *Accuracy Rate*, *Typing Consistency*, dan *Typo Tracker*.
+1. **Bank Kata Masif & Pengacakan Dinamis**:
+   - Bank kata ditingkatkan menjadi **12 paragraf berbobot per kategori (total 48 korpus teks)**.
+   - Tombol **"Ulangi"** (atau pintasan **Tab + Enter**) tidak lagi hanya mengulang teks yang sama, melainkan **mengganti teks dan mengacak susunan kalimat/kata** menggunakan algoritma *Fisher-Yates Shuffle*. Setiap sesi pengetikan dijamin menyajikan urutan kata yang baru dan menantang.
+2. **Penanganan AFK (Away From Keyboard) & Zero Metrics**:
+   - Saat pengguna berhenti mengetik selama lebih dari 4 detik saat sesi aktif, waktu akan **dijeda otomatis (*idle pause*)**.
+   - Jika sesi berakhir tanpa ada aktivitas pengetikan yang cukup ($< 5$ karakter), metrik **disetel ke NOL (0 WPM, 0% Akurasi, 0% Konsistensi)** dan **TIDAK dimasukkan ke dalam riwayat `localStorage`** guna menjaga integritas data latihan pengguna.
+3. **Penyempurnaan Posisi Kursor (*Precise Caret Alignment*)**:
+   - Elemen `#caret` dipindahkan langsung ke dalam kontainer `.text-viewport` sehingga kalkulasi koordinat `left` dan `top` bersandar pada sistem koordinat lokal yang identik dengan elemen huruf. Kursor kini berdiri tegak tepat di depan dan sejajar sempurna dengan karakter target tanpa pergeseran vertikal (*zero vertical offset displacement*).
 
 ---
 
-## 2. Arsitektur Teknis & Struktur Proyek
+## 2. Arsitektur Teknis & Struktur Berkas
 
-Aplikasi dirancang dengan pemisahan keprihatinan (*separation of concerns*) yang bersih tanpa dependensi eksternal, bundler, atau kerangka kerja berat:
+Aplikasi dirancang dengan pemisahan peran (*separation of concerns*) yang bersih tanpa dependensi eksternal atau kerangka kerja berat:
 
 ```
 Literasi Digital Prototipe Produk/
 ├── index.html           # Struktur semantik HTML5, SVG inline, Google Fonts, & modal
 ├── style.css            # Desain Dark Mode (#09090b), variabel CSS, kursor meluncur, spotlight
-├── data.js              # Bank korpus teks 4 kategori & konfigurasi layout 10 jari standar
-├── script.js            # Typing engine, audio sintetis, smooth caret, ticker, & localStorage
-├── DOKUMENTASI_PRODUK.md# Dokumentasi teknis & spesifikasi produk
+├── data.js              # Bank 48 korpus teks & konfigurasi layout 10 jari standar
+├── script.js            # Engine pengetikan, pengacak Fisher-Yates, deteksi AFK, audio sintetis
+├── DOKUMENTASI_PRODUK.md# Dokumentasi teknis & spesifikasi produk di repositori
 └── README.md            # Panduan pengoperasian cepat
 ```
-
-### 🔧 Rincian Komponen Arsitektur:
-- **`index.html`**: Menyediakan kerangka semantik yang aksesibel, dialog modal bawaan, tombol navigasi, dan SVG inline yang 100% *offline-ready* tanpa risiko kegagalan unduh CDN ikon.
-- **`style.css`**: Sistem gaya berbasis CSS Custom Properties (CSS Variables), tata letak Flexbox dan CSS Grid adaptif, serta `@keyframes` animasi fisik.
-- **`data.js`**: Objek data `window.TYPING_DATA` yang memuat seluruh dataset paragraf, konfigurasi tombol QWERTY, koordinat baris taktil, serta pemetaan 9 zona warna jari.
-- **`script.js`**: Mengelola *finite state machine* siklus latihan (IDLE, ACTIVE, FINISHED), penanganan event `keydown`/`keyup`, mesin suara Web Audio API, kalkulasi metrik WPM, dan manipulasi DOM secara efisien.
 
 ---
 
 ## 3. Desain Sistem & Komponen UI/UX Motion
 
-KetikCepat menerapkan estetika **Dark Mode Minimalis** dengan palet warna kontras tinggi yang nyaman di mata untuk sesi latihan berdurasi panjang:
+KetikCepat menerapkan estetika **Dark Mode Minimalis** dengan palet warna kontras tinggi:
 
 ```mermaid
 flowchart LR
@@ -54,15 +51,17 @@ flowchart LR
 ### 🌟 Komponen & Mikro-Interaksi (ReactBits.dev Style)
 
 #### 1. Smooth Caret (Kursor Meluncur Presisi)
-- **Implementasi**: Elemen kursor `<div id="caret">` dengan transisi fisik:
+- **Implementasi**: Elemen kursor `<div id="caret">` berada langsung di dalam `#textViewport` dengan transisi fisik:
   ```css
   transition: left 0.08s cubic-bezier(0.22, 1, 0.36, 1),
               top 0.08s cubic-bezier(0.22, 1, 0.36, 1),
               height 0.08s ease;
   ```
-- **Kompensasi Vertikal Dinamis**: Tinggi kursor dikunci proporsional terhadap *cap-height* huruf (`fontSize * 1.25 ≈ 25px`), dan posisinya dihitung otomatis:
-  $$\text{topPos} = \text{spanRect.top} - \text{viewportRect.top} + \text{scrollTop} + \frac{\text{spanRect.height} - \text{caretHeight}}{2}$$
-  Hal ini menjamin kursor selalu berdiri tegak sejajar dan pas di depan karakter aktif tanpa melorot ke bawah.
+- **Kompensasi Koordinat Lokal**:
+  $$\text{leftPos} = \text{spanRect.left} - \text{viewportRect.left} + \text{scrollLeft}$$
+  $$\text{topPos} = \text{spanRect.top} - \text{viewportRect.top} + \text{scrollTop}$$
+  $$\text{caretHeight} = \text{spanRect.height}$$
+  Menghilangkan kesalahan *parent padding offset* dan menjamin kursor berdiri tepat sejajar dari puncak hingga dasar karakter aktif.
 
 #### 2. Spotlight Bento Cards
 - Kartu statistik pasca-latihan memanfaatkan variabel CSS `--mouse-x` dan `--mouse-y` yang diperbarui saat event `mousemove`. Efek `radial-gradient` memancarkan pendaran cahaya lembut yang mengikuti kursor pengguna saat menjelajahi statistik.
@@ -74,107 +73,49 @@ flowchart LR
 - Pemilih kategori dan durasi menggunakan elemen *glider* absolut yang bergeser secara pegas menggunakan kurva `cubic-bezier(0.34, 1.56, 0.64, 1)` saat pengguna berpindah tab.
 
 #### 5. Animated Number Ticker
-- Perhitungan angka Net WPM, persentase akurasi, dan konsistensi digerakkan menggunakan `requestAnimationFrame` dengan fungsi pelambatan kubik (*cubic ease-out*) selama 1000–1200ms saat layar hasil dibuka.
-
-#### 6. Interactive Virtual Keyboard (Panduan 10 Jari)
-- Menampilkan 5 baris tombol QWERTY standar dengan pembagian 9 zona warna jari:
-  - **Kelingking Kiri** (`#ec4899`): Tombol `~`, `1`, `Q`, `A`, `Z`, `Tab`, `Caps`, `Shift`.
-  - **Jari Manis Kiri** (`#a855f7`): Tombol `2`, `W`, `S`, `X`.
-  - **Jari Tengah Kiri** (`#3b82f6`): Tombol `3`, `E`, `D`, `C`.
-  - **Telunjuk Kiri** (`#10b981`): Tombol `4`, `5`, `R`, `T`, `F`, `G`, `V`, `B` (Tonjolan taktil di `F`).
-  - **Kedua Ibu Jari** (`#94a3b8`): Tombol `Spasi`.
-  - **Telunjuk Kanan** (`#14b8a6`): Tombol `6`, `7`, `Y`, `U`, `H`, `J`, `N`, `M` (Tonjolan taktil di `J`).
-  - **Jari Tengah Kanan** (`#06b6d4`): Tombol `8`, `I`, `K`, `,`.
-  - **Jari Manis Kanan** (`#f59e0b`): Tombol `9`, `O`, `L`, `.`.
-  - **Kelingking Kanan** (`#f43f5e`): Tombol `0`, `-`, `=`, `P`, `[`, `]`, `\`, `;`, `'`, `Enter`, `/`.
+- Perhitungan angka Net WPM, persentase akurasi, dan konsistensi digerakkan menggunakan `requestAnimationFrame` dengan fungsi pelambatan kubik (*cubic ease-out*) selama 1000ms saat layar hasil dibuka.
 
 ---
 
-## 4. Bank Korpus Teks Bahasa Indonesia
+## 4. Bank Korpus Teks Bahasa Indonesia (48 Teks)
 
-Tersedia **28 paragraf lengkap** yang terbagi ke dalam 4 kategori spesifik:
+Tersedia **48 paragraf berbobot** yang terbagi rata ke dalam 4 kategori spesifik:
 
 ```mermaid
-pie title Distribusi Bank Data Teks KetikCepat
-    "Akademik & Skripsi (7 Teks)" : 25
-    "Teknologi & Informatika (7 Teks)" : 25
-    "Hukum & Ekonomi (7 Teks)" : 25
-    "Sastra & Budaya (7 Teks)" : 25
+pie title Distribusi 48 Korpus Teks KetikCepat (v1.1)
+    "Akademik & Skripsi (12 Teks)" : 25
+    "Teknologi & Informatika (12 Teks)" : 25
+    "Hukum & Ekonomi (12 Teks)" : 25
+    "Sastra & Budaya (12 Teks)" : 25
 ```
 
-1. **Akademik & Skripsi**:
-   - Istilah: *Kuesioner Likert, korelasi Pearson, regresi linear berganda, Cronbach Alpha, validitas konstruk, research gap, kerangka teoretis, uji Kolmogorov-Smirnov, Variance Inflation Factor (VIF), triangulasi fenomenologis, reduksi data, APA edisi ketujuh*.
-2. **Teknologi & Informatika**:
-   - Istilah: *Notasi Big O, quicksort, arsitektur transformator, mekanisme atensi, penurunan stokastik (SGD), layanan mikro Docker, orkestrasi Kubernetes, zero trust, enkripsi RSA, TLS, teorema CAP, NoSQL, kedaulatan digital, edge computing*.
-3. **Hukum & Ekonomi**:
-   - Istilah: *Kebijakan fiskal ekspansif, bauran moneter, valuta asing, inflasi bergejolak, asas legalitas hukum pidana, yurisprudensi Mahkamah Agung, kepatuhan pasar modal, UUD 1945, pengujian materiil Mahkamah Konstitusi, UMKM, arbitrase komersial*.
-4. **Sastra & Budaya**:
-   - Istilah: *Sumpah Pemuda, kelenturan morfologi, khazanah sastra tradisional, pantun Melayu, tembang macapat Jawa, puitika urban metropolitan, literasi kritis, filosofi motif kain tenun ikat, kearifan ekologis arsitektur vernakular*.
+1. **Akademik & Skripsi (12 Teks)**: Metodologi kuantitatif, sintesis tinjauan pustaka, uji Kolmogorov-Smirnov, hipotesis kausalitas, triangulasi kualitatif, etika publikasi APA, implikasi manajerial, paradigma hermeneutika, teknik sampling probabilitas, pemodelan persamaan struktural (SEM), validasi konstruk Fornell-Larcker, dan meta-analisis.
+2. **Teknologi & Informatika (12 Teks)**: Notasi Big O, arsitektur transformator & AI, komputasi awan Kubernetes, zero trust & TLS, teorema CAP NoSQL, kedaulatan digital, edge computing, prinsip SOLID & desain pola, arsitektur konkurensi coroutine, broker pesan Kafka, keamanan rantai pasok CI/CD, dan GraphQL vs REST.
+3. **Hukum & Ekonomi (12 Teks)**: Kebijakan fiskal ekspansif, transmisi moneter & inflasi, asas legalitas pidana, tata kelola korporasi (GCG), hierarki perundang-undangan UUD 1945, ekonomi kerakyatan UMKM, arbitrase dagang internasional, perlindungan konsumen, teori portofolio modern, persaingan usaha tidak sehat KPPU, ketahanan agraria, dan AMDAL lingkungan.
+4. **Sastra & Budaya (12 Teks)**: Sumpah Pemuda & morfologi bahasa, sastra lisan Nusantara, puitika memori kota metropolitan, literasi kritis era digital, filosofi tenun ikat, dialog kebudayaan antargenerasi, arsitektur vernakular panggung, metafora puisi batin, diplomasi rempah pinisi, filosofi wayang kulit, kosmologi hutan adat, dan esai budaya warung kopi.
 
 ---
 
-## 5. Mesin Kalkulasi & Metrik Pengetikan
+## 5. Mesin Kalkulasi & Logika Proteksi AFK
 
-KetikCepat menerapkan standardisasi pengetikan formal:
+### 🛡️ Proteksi Sesi AFK (Away From Keyboard)
+- **Idle Pause**: Timer berhenti sementara jika pengguna tidak menekan tombol apa pun selama 4 detik.
+- **Validasi Penyimpanan Riwayat**:
+  - Jika $\text{Total Karakter} < 5$ atau $\text{Karakter Benar} = 0$:
+    - $\text{Net WPM} = 0$, $\text{Raw WPM} = 0$.
+    - $\text{Akurasi} = 0\%$ (bukan 100%).
+    - $\text{Konsistensi} = 0\%$ (bukan 100%).
+    - **Sesi TIDAK disimpan** ke dalam `localStorage`.
+    - Muncul banner peringatan: `⚠️ Sesi Tidak Disimpan (Terdeteksi AFK)`.
 
-### 1. Raw WPM (Gross Speed)
-Mengukur total seluruh karakter yang diketik dibagi 5 (standar 1 kata internasional) per menit tanpa memperhitungkan kesalahan:
+### 📊 Rumus Metrik Pengetikan Valid
 $$\text{Raw WPM} = \frac{\text{Total Karakter Diketik} / 5}{\text{Waktu (detik)} / 60}$$
-
-### 2. Net WPM (Kecepatan Bersih)
-Mengukur kecepatan efektif dengan mengurangi penalti atas karakter yang salah:
 $$\text{Net WPM} = \max\left(0, \frac{(\text{Karakter Benar} - \text{Karakter Salah}) / 5}{\text{Waktu (detik)} / 60}\right)$$
-
-### 3. Akurasi Pengetikan (%)
 $$\text{Akurasi} = \left(\frac{\text{Karakter Benar}}{\text{Total Karakter Diketik}}\right) \times 100\%$$
-
-### 4. Konsistensi Pengetikan (%)
-Diukur berdasarkan koefisien variasi (*Coefficient of Variation - CV*) dari rekaman WPM setiap interval 1 detik:
-$$\text{Mean} (\mu) = \frac{\sum \text{WPM}_t}{N}, \quad \text{StdDev} (\sigma) = \sqrt{\frac{\sum (\text{WPM}_t - \mu)^2}{N}}$$
 $$\text{Konsistensi} = \max\left(0, \min\left(100, \left(1 - \frac{\sigma}{\mu}\right) \times 100\right)\right)$$
 
-### 5. Benchmark Level Kecepatan (Speed Tiers)
-- **$\ge 80$ WPM**: *Master Typist (Ahli)* — Kecepatan setara juru ketik profesional.
-- **$65 - 79$ WPM**: *Sangat Cepat (Pro)* — Sangat produktif untuk koding dan karya tulis ilmiah.
-- **$45 - 64$ WPM**: *Mahir (Fluent)* — Di atas rata-rata kecepatan pengetik dunia kerja.
-- **$30 - 44$ WPM**: *Menengah (Intermediate)* — Kecepatan mengetik fungsional harian.
-- **$< 30$ WPM**: *Pemula (Developing)* — Tahap pembentukan memori otot 10 jari.
-
 ---
 
-## 6. Fitur Pendukung & Audio Engine
+## 6. Panduan Menjalankan
 
-### 🔊 Sintesis Suara Ketik (Web Audio API)
-- Menggunakan osilator bawaan browser (`sine` wave frekuensi 520Hz dengan decay eksponensial ke 190Hz dalam 35ms) untuk menghasilkan suara *thock* empuk layaknya sakelar keyboard mekanikal.
-- Suara kesalahan (*error*) disintesis menggunakan gelombang `sawtooth` frekuensi rendah 140Hz ke 70Hz.
-- Akord harmoni kemenangan (*victory chime*) empat nada [C5, E5, G5, C6] saat menyelesaikan tes.
-- Tidak memerlukan berkas eksternal `.mp3`/`.wav`, sehingga hemat memori dan instan tanpa latensi unduh.
-
-### ⌨️ Pintasan Keyboard (Shortcuts)
-- **Tab + Enter**: Mengulang (*restart*) sesi seketika.
-- **Ctrl + Backspace**: Menghapus satu kata penuh sekaligus.
-- **Spasi**: Maju ke kata berikutnya tanpa menyebabkan halaman web bergulir ke bawah (*prevent scroll*).
-- **Auto-Focus Cerdas**: Mengetuk area mana pun pada kartu pengetikan akan langsung mengembalikan fokus input pengetikan.
-
----
-
-## 7. Riwayat Progres & Ekspor Bukti Latihan
-
-1. **Penyimpanan Lokal (`localStorage`)**:
-   - Menyimpan otomatis 10 sesi terakhir dengan skema objek JSON lengkap (timestamp, judul teks, durasi, WPM, akurasi, konsistensi, karakter benar/salah, dan karakter paling sering keliru).
-2. **Grafik Batang Visual Tren**:
-   - Modal riwayat dilengkapi diagram batang CSS Flex yang menunjukkan kurva peningkatan Net WPM dari sesi ke sesi secara kronologis.
-3. **Ekspor CSV**:
-   - Menghasilkan berkas `.csv` ber-encoding `UTF-8 with BOM` yang dapat langsung dibuka dengan sempurna di Microsoft Excel, Google Sheets, atau Numbers tanpa karakter rusak.
-4. **Salin Ringkasan Clipboard**:
-   - Menyalin format ringkasan nilai latihan siap tempel untuk laporan tugas atau portofolio literasi digital.
-
----
-
-## 8. Panduan Menjalankan Aplikasi
-
-Aplikasi tidak memerlukan instalasi Node.js, npm, ataupun server lokal:
-1. Buka folder proyek pada File Explorer.
-2. Klik dua kali (*double click*) pada berkas **`index.html`**.
-3. Aplikasi langsung terbuka di peramban utama Anda dan siap digunakan secara instan!
-
+Cukup buka folder proyek dan **klik dua kali (*double click*) pada file `index.html`** di browser apa pun tanpa memerlukan Node.js atau web server.
