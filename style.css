@@ -43,7 +43,7 @@ body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  overflow-x: hidden;
+  /* overflow-x dihapus agar aurora fullwidth tidak terpotong */
   -webkit-font-smoothing: antialiased;
 }
 
@@ -77,22 +77,13 @@ body {
   height: 100vh;
   pointer-events: none;
   z-index: 0;
-  opacity: 0.55;
+  opacity: 0.12;
   transition: opacity 0.5s ease;
 }
 
-/* Background Subtle Lighting */
+/* Background Subtle Lighting — dinonaktifkan (minimalis solid) */
 .ambient-glow {
-  position: fixed;
-  top: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 800px;
-  height: 350px;
-  background: radial-gradient(circle, rgba(16, 185, 129, 0.08) 0%, rgba(6, 182, 212, 0.03) 40%, transparent 70%);
-  filter: blur(60px);
-  pointer-events: none;
-  z-index: 0;
+  display: none;
 }
 
 /* Layout Wrapper */
@@ -102,7 +93,7 @@ body {
   width: 100%;
   max-width: 960px;
   margin: 0 auto;
-  padding: 1rem 1.25rem 2rem;
+  padding: 1rem 1.25rem 0;
   display: flex;
   flex-direction: column;
   min-height: 100vh;
@@ -377,12 +368,10 @@ header {
   border-radius: 1.5rem;
   padding: 1.75rem 2rem;
   cursor: text;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
-  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  transition: border-color 0.3s ease;
 }
 .typing-card:focus-within, .typing-card.focused {
-  border-color: rgba(16, 185, 129, 0.4);
-  box-shadow: 0 0 35px rgba(16, 185, 129, 0.08);
+  border-color: rgba(16, 185, 129, 0.35);
 }
 
 /* Hidden input untuk menangani ketikan keyboard fisik/mobile */
@@ -413,21 +402,12 @@ header {
   width: 2.5px;
   background: var(--color-emerald);
   border-radius: 2px;
-  box-shadow: 0 0 12px rgba(16, 185, 129, 0.9);
   pointer-events: none;
   z-index: 10;
   transition: left 0.08s var(--ease-smooth), top 0.08s var(--ease-smooth), height 0.08s ease;
 }
 #caret::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -2px;
-  width: 6.5px;
-  height: 100%;
-  background: rgba(16, 185, 129, 0.35);
-  filter: blur(3px);
-  border-radius: 2px;
+  display: none;
 }
 
 /* Kata & Karakter */
@@ -622,7 +602,6 @@ header {
   background: #27272a;
   color: #fff;
   border-color: var(--color-emerald);
-  box-shadow: 0 0 12px rgba(16, 185, 129, 0.4);
   font-weight: 700;
   transform: translateY(-1px);
 }
@@ -631,7 +610,6 @@ header {
   color: #000 !important;
   font-weight: 800;
   border-color: #34d399 !important;
-  box-shadow: 0 0 16px rgba(16, 185, 129, 0.8) !important;
   transform: translateY(2px) scale(0.94);
 }
 
@@ -882,7 +860,6 @@ header {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  box-shadow: 0 0 20px rgba(16, 185, 129, 0.35);
   transition: all 0.2s ease;
 }
 .btn-primary:hover {
@@ -1060,15 +1037,272 @@ header {
   background: rgba(39, 39, 42, 0.2);
 }
 
-/* Footer */
-footer {
+/* ==========================================================================
+   SUI-STYLE PLATFORM FOOTER & STEPPED EQUALIZER GRAIN BARS
+   (Inspirasi Desain Resmi Sui.io / Monospace Tech Platform)
+   ========================================================================== */
+
+.sui-footer {
+  width: 100%;
+  background-color: #000000;
+  border-top: 1px solid #18181b;
+  color: #71717a;
+  font-family: var(--font-mono);
+  position: relative;
+  overflow: hidden;
+  margin-top: 3.5rem;
+  z-index: 2;
+}
+
+.sui-footer-inner {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 3.5rem 1.25rem 2rem;
+  position: relative;
+  z-index: 3;
+}
+
+/* Brand glyph / waterdrop row */
+.sui-brand-row {
+  margin-bottom: 2rem;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding-top: 1.5rem;
-  border-top: 1px solid #18181b;
+}
+
+.sui-brand-glyph {
+  display: block;
+}
+
+/* Directory columns */
+.sui-directory-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 2rem;
+  margin-bottom: 2.75rem;
+}
+
+.sui-dir-col {
+  display: flex;
+  flex-direction: column;
+}
+
+.sui-dir-heading {
   font-size: 0.75rem;
-  color: var(--text-muted);
+  font-weight: 700;
+  color: #f4f4f5;
+  letter-spacing: 0.08em;
+  margin-bottom: 1.1rem;
+}
+
+.sui-dir-links {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  font-size: 0.72rem;
+}
+
+.sui-dir-links li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.45rem;
+  color: #71717a;
+  line-height: 1.45;
+  transition: color 0.15s ease;
+}
+
+.sui-dir-links li:hover {
+  color: #e4e4e7;
+}
+
+.tree-branch {
+  color: #3f3f46;
+  font-size: 0.65rem;
+  flex-shrink: 0;
+  user-select: none;
+}
+
+.sui-kbd {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  background: #18181b;
+  color: #a1a1aa;
+  border: 1px solid #27272a;
+  border-radius: 0.25rem;
+  padding: 0.05rem 0.35rem;
+}
+
+/* Social / Action Boxed Buttons */
+.sui-actions-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.sui-icon-btn {
+  width: 2.1rem;
+  height: 2.1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #09090b;
+  border: 1px solid #27272a;
+  border-radius: 0.35rem;
+  color: #a1a1aa;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.sui-icon-btn:hover {
+  background: #18181b;
+  color: var(--color-emerald);
+  border-color: rgba(16, 185, 129, 0.45);
+  transform: translateY(-1px);
+}
+
+/* Copyright line */
+.sui-copyright-text {
+  font-size: 0.72rem;
+  color: #52525b;
+  letter-spacing: 0.02em;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   STEPPED EQUALIZER GRAIN BARS (Visual Grafis Bawah Khas Sui.io)
+   6 Kolom vertikal bergaris putus-putus dengan bar gradient solid & noise
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.sui-stepped-bars {
+  position: relative;
+  width: 100%;
+  height: 300px;
+  background: #000000;
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  overflow: hidden;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* Film Grain / Stipple Noise Texture Overlay di atas seluruh bar */
+.sui-stepped-bars::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.25'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 160px 160px;
+  mix-blend-mode: overlay;
+}
+
+/* Garis horizontal pendaran dasar (menyatukan semua bar di bagian bawah) */
+.sui-stepped-bars::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 55px;
+  background: linear-gradient(to top, rgba(16, 185, 129, 0.35) 0%, transparent 100%);
+  z-index: 4;
+  pointer-events: none;
+}
+
+/* Kolom Grid Vertikal bergaris putus-putus */
+.sui-bar-col {
+  position: relative;
+  height: 100%;
+  border-right: 1px dotted rgba(255, 255, 255, 0.20);
+}
+
+.sui-bar-col:last-child {
+  border-right: none;
+}
+
+/* Elemen Batang Warna (Bar Fill) yang naik ke atas */
+.sui-bar-fill {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 2;
+  background: linear-gradient(
+    to top,
+    #ecfdf5 0%,
+    #a7f3d0 8%,
+    #34d399 22%,
+    #10b981 40%,
+    #059669 62%,
+    #047857 78%,
+    #064e3b 90%,
+    rgba(6, 78, 59, 0) 100%
+  );
+  /* Top stipple horizon fade */
+  -webkit-mask-image: linear-gradient(to top, black 85%, transparent 100%);
+  mask-image: linear-gradient(to top, black 85%, transparent 100%);
+}
+
+/* Variasi Tinggi Bertingkat (Stepped Heights) Persis Referensi Sui */
+.sui-bar-col.col-1 .sui-bar-fill {
+  height: 42%;
+  opacity: 0.70;
+}
+
+.sui-bar-col.col-2 .sui-bar-fill {
+  height: 72%;
+  opacity: 0.90;
+}
+
+/* Kolom 3 — Puncak Tertinggi & Paling Terang */
+.sui-bar-col.col-3 .sui-bar-fill {
+  height: 96%;
+  opacity: 1;
+  background: linear-gradient(
+    to top,
+    #ffffff 0%,
+    #a7f3d0 10%,
+    #34d399 25%,
+    #10b981 45%,
+    #059669 68%,
+    #047857 85%,
+    rgba(4, 120, 87, 0) 100%
+  );
+}
+
+.sui-bar-col.col-4 .sui-bar-fill {
+  height: 78%;
+  opacity: 0.88;
+}
+
+.sui-bar-col.col-5 .sui-bar-fill {
+  height: 58%;
+  opacity: 0.78;
+}
+
+.sui-bar-col.col-6 .sui-bar-fill {
+  height: 38%;
+  opacity: 0.65;
+}
+
+/* Responsivitas Layar Kecil */
+@media (max-width: 768px) {
+  .sui-directory-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+  }
+  .sui-stepped-bars {
+    height: 200px;
+  }
+}
+
+@media (max-width: 480px) {
+  .sui-directory-grid {
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+  }
 }
 
 /* Responsivitas Layar Kecil */
