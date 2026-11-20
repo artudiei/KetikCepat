@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KetikCepat — Simulasi Latihan Mengetik 10 Jari Bahasa Indonesia</title>
+
+  <!-- Google Fonts: Plus Jakarta Sans & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Ambient Subtle Background Glow -->
+  <div class="ambient-glow"></div>
+
+  <div class="app-container">
+    <!-- Header Aplikasi -->
+    <header>
+      <div class="brand" onclick="location.reload()">
+        <div class="brand-icon">
+          <div class="brand-icon-inner">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect width="20" height="16" x="2" y="4" rx="2"/>
+              <path d="M6 8h.01"/><path d="M10 8h.01"/><path d="M14 8h.01"/><path d="M18 8h.01"/>
+              <path d="M8 12h.01"/><path d="M12 12h.01"/><path d="M16 12h.01"/><path d="M7 16h10"/>
+            </svg>
+          </div>
+        </div>
+        <div>
+          <div class="brand-title">
+            <span>Ketik</span><span class="accent">Cepat</span>
+            <span class="brand-badge">v1.0</span>
+          </div>
+          <div class="brand-tagline">Simulasi Latihan 10 Jari • Teks Akademik & Lokal Indonesia</div>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <!-- Toggle Suara -->
+        <button id="btnToggleSound" class="btn-header" title="Toggle Suara Ketik">
+          <span id="soundIconWrap" style="display:flex;align-items:center;gap:0.35rem;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+              <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+            </svg>
+            <span>Suara Aktif</span>
+          </span>
+        </button>
+
+        <!-- Panduan Jari -->
+        <button id="btnOpenInfo" class="btn-header" title="Panduan Posisi 10 Jari">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+          </svg>
+          <span>Panduan</span>
+        </button>
+
+        <!-- Riwayat Sesi -->
+        <button id="btnOpenHistory" class="btn-header" title="Lihat Riwayat Latihan">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+            <path d="M3 3v5h5"></path>
+            <path d="M12 7v5l4 2"></path>
+          </svg>
+          <span>Riwayat</span>
+          <span id="historyCountBadge" class="counter-badge">0</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main>
+      <!-- View Sesi Pengetikan Aktif -->
+      <section id="typingSessionView">
+        <!-- Controls Bar (Sliding Pill Switcher) -->
+        <div class="controls-bar">
+          <!-- Kategori Teks -->
+          <div class="pill-container" id="categoryTabs">
+            <div class="pill-glider" id="categoryGlider"></div>
+            <button class="pill-btn" data-category="akademik">
+              <span>Akademik & Skripsi</span>
+            </button>
+            <button class="pill-btn" data-category="teknologi">
+              <span>Teknologi & Informatika</span>
+            </button>
+            <button class="pill-btn" data-category="hukum-ekonomi">
+              <span>Hukum & Ekonomi</span>
+            </button>
+            <button class="pill-btn" data-category="sastra-budaya">
+              <span>Sastra & Budaya</span>
+            </button>
+          </div>
+
+          <!-- Pilihan Durasi -->
+          <div class="pill-container" id="durationTabs">
+            <div class="pill-glider" id="durationGlider"></div>
+            <button class="pill-btn" data-duration="15">
+              <span>15s</span>
+              <span class="pill-badge">Cepat</span>
+            </button>
+            <button class="pill-btn" data-duration="30">
+              <span>30s</span>
+              <span class="pill-badge">Standar</span>
+            </button>
+            <button class="pill-btn" data-duration="60">
+              <span>60s</span>
+              <span class="pill-badge">Ujian</span>
+            </button>
+            <button class="pill-btn" data-duration="paragraph">
+              <span>1 Paragraf</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Live Metrics Minimalis -->
+        <div class="metrics-bar">
+          <div class="metric-group">
+            <div class="metric-item">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline>
+              </svg>
+              <span id="liveTimer" class="metric-val">30s</span>
+              <span id="liveTimerLabel" class="metric-label">tersisa</span>
+            </div>
+
+            <div style="width:1px;height:16px;background:#27272a;"></div>
+
+            <div style="font-size:0.75rem;color:#d4d4d8;font-weight:600;" id="textTitleDisplay">
+              Memuat Teks...
+            </div>
+          </div>
+
+          <div class="metric-group">
+            <div class="metric-item">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2">
+                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+              </svg>
+              <span id="liveWpm" class="metric-val emerald">0</span>
+              <span class="metric-label">WPM</span>
+            </div>
+
+            <div class="metric-item">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#06b6d4" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle>
+              </svg>
+              <span id="liveAccuracy" class="metric-val cyan">100%</span>
+              <span class="metric-label">Akurasi</span>
+            </div>
+
+            <!-- Tombol Quick Restart -->
+            <button id="btnRestart" class="btn-restart" title="Restart Latihan (Tab + Enter)">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"></path>
+              </svg>
+              <span>Ulangi</span>
+              <span class="kbd-hint">Tab ↵</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Kartu Permukaan Pengetikan -->
+        <div class="typing-card" id="typingCard">
+          <!-- Hidden Input untuk menangani keystroke desktop & mobile -->
+          <input type="text" id="hiddenInput" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+
+          <!-- Smooth Caret (Kursor Meluncur) -->
+          <div id="caret"></div>
+
+          <!-- Text Viewport -->
+          <div class="text-viewport" id="textViewport"></div>
+
+          <!-- Unfocused Overlay Warning -->
+          <div class="unfocused-overlay" id="unfocusedOverlay">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2">
+              <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
+              <polyline points="10 17 15 12 10 7"></polyline>
+              <line x1="15" y1="12" x2="3" y2="12"></line>
+            </svg>
+            <div class="unfocused-text">Klik di sini untuk melanjutkan mengetik</div>
+            <div class="unfocused-sub">Jendela sedang kehilangan fokus</div>
+          </div>
+
+          <!-- Card Footer & Progress Bar -->
+          <div class="card-footer">
+            <div class="progress-wrap">
+              <span>Kemajuan:</span>
+              <div class="progress-bar-bg">
+                <div class="progress-bar-fill" id="progressBarFill"></div>
+              </div>
+              <span id="progressPercent" style="font-family:var(--font-mono);color:#a1a1aa;">0%</span>
+            </div>
+            <div>Mulai mengetik untuk menjalankan waktu</div>
+          </div>
+        </div>
+
+        <!-- Interactive Virtual Keyboard & Finger Guide -->
+        <section class="keyboard-section" id="keyboardSection">
+          <div class="keyboard-header">
+            <div class="kb-title">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2">
+                <rect width="20" height="16" x="2" y="4" rx="2"/>
+                <path d="M6 8h.01"/><path d="M10 8h.01"/><path d="M14 8h.01"/><path d="M18 8h.01"/>
+              </svg>
+              <span>Panduan 10 Jari Interaktif</span>
+              <div class="finger-suggestion" id="fingerHintBadge">
+                <span class="finger-dot"></span>
+                <span>Siap Mengetik</span>
+              </div>
+            </div>
+
+            <button id="btnToggleKeyboard" style="background:transparent;border:none;color:#71717a;font-size:0.75rem;cursor:pointer;">
+              Sembunyikan
+            </button>
+          </div>
+
+          <div class="keyboard-container">
+            <div id="keyboardRowsWrap"></div>
+
+            <!-- Legenda Zona 10 Jari -->
+            <div class="keyboard-legend">
+              <span style="font-weight:700;text-transform:uppercase;color:#52525b;">Zona Jari:</span>
+              <div class="legend-item"><span class="legend-dot" style="background:#ec4899;"></span> Kelingking Kiri</div>
+              <div class="legend-item"><span class="legend-dot" style="background:#a855f7;"></span> Jari Manis Kiri</div>
+              <div class="legend-item"><span class="legend-dot" style="background:#3b82f6;"></span> Jari Tengah Kiri</div>
+              <div class="legend-item"><span class="legend-dot" style="background:#10b981;"></span> Telunjuk Kiri</div>
+              <div class="legend-item"><span class="legend-dot" style="background:#94a3b8;"></span> Ibu Jari (Spasi)</div>
+              <div class="legend-item"><span class="legend-dot" style="background:#14b8a6;"></span> Telunjuk Kanan</div>
+              <div class="legend-item"><span class="legend-dot" style="background:#06b6d4;"></span> Jari Tengah Kanan</div>
+              <div class="legend-item"><span class="legend-dot" style="background:#f59e0b;"></span> Jari Manis Kanan</div>
+              <div class="legend-item"><span class="legend-dot" style="background:#f43f5e;"></span> Kelingking Kanan</div>
+            </div>
+          </div>
+        </section>
+      </section>
+
+      <!-- View Layar Hasil Evaluasi (Spotlight Bento Grid & Blur Text Reveal) -->
+      <section id="resultsView">
+        <div class="results-header">
+          <div class="results-tag">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="8" r="7"></circle><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline>
+            </svg>
+            <span>Sesi Latihan Selesai</span>
+          </div>
+          <h2 class="results-title blur-reveal">Hasil Analisis Pengetikan</h2>
+          <div class="results-subtitle">
+            <span id="resultSpeedTier" style="font-weight:700;"></span> • <span id="resultTextInfo"></span>
+          </div>
+        </div>
+
+        <!-- Bento Grid Spotlight Cards (ReactBits.dev inspired) -->
+        <div class="bento-grid">
+          <!-- Card 1: Net WPM (Hero Metric) -->
+          <div class="spotlight-card card-span-2" style="--spotlight-color: rgba(16, 185, 129, 0.25);">
+            <div class="spotlight-content">
+              <div class="bento-label">
+                <span>⚡ Kecepatan Bersih (Net WPM)</span>
+                <span id="resultRawWpm" style="font-family:var(--font-mono);font-size:0.75rem;color:#71717a;">Raw: 0</span>
+              </div>
+              <div style="display:flex;align-items:baseline;">
+                <span id="resultNetWpm" class="bento-hero-val">0</span>
+                <span class="bento-hero-unit">WPM</span>
+              </div>
+              <div class="bento-desc">
+                Dihitung dari kata standar (5 karakter per kata) dikurangi penalti salah ketik per menit.
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 2: Akurasi -->
+          <div class="spotlight-card" style="--spotlight-color: rgba(6, 182, 212, 0.2);">
+            <div class="spotlight-content">
+              <div class="bento-label">
+                <span>🎯 Akurasi</span>
+              </div>
+              <div style="display:flex;align-items:baseline;">
+                <span id="resultAccuracy" class="bento-hero-val cyan">0%</span>
+              </div>
+              <div class="bento-desc">Persentase ketukan huruf yang tepat sasaran.</div>
+            </div>
+          </div>
+
+          <!-- Card 3: Konsistensi -->
+          <div class="spotlight-card" style="--spotlight-color: rgba(168, 85, 247, 0.2);">
+            <div class="spotlight-content">
+              <div class="bento-label">
+                <span>📈 Konsistensi</span>
+              </div>
+              <div style="display:flex;align-items:baseline;">
+                <span id="resultConsistency" class="bento-hero-val purple">0%</span>
+              </div>
+              <div class="bento-desc">Keseragaman ritme kecepatan per detik.</div>
+            </div>
+          </div>
+
+          <!-- Card 4: Analisis Huruf Bermasalah (Typo Tracker) -->
+          <div class="spotlight-card card-span-2" style="--spotlight-color: rgba(239, 68, 68, 0.2);">
+            <div class="spotlight-content">
+              <div class="bento-label">
+                <span>⚠️ Huruf Paling Sering Salah</span>
+                <span style="font-size:0.7rem;color:#71717a;">Typo Tracker</span>
+              </div>
+              <div class="typo-badges" id="typoBadgesContainer"></div>
+              <div class="bento-desc">
+                Latihlah tombol di atas dengan memprioritaskan jari yang direkomendasikan.
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 5: Rincian Karakter -->
+          <div class="spotlight-card card-span-2" style="--spotlight-color: rgba(245, 158, 11, 0.2);">
+            <div class="spotlight-content">
+              <div class="bento-label">
+                <span>⏱️ Rincian Pengetikan</span>
+                <span id="resultTime" style="font-family:var(--font-mono);color:#71717a;">0s</span>
+              </div>
+              <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0.5rem;margin:0.5rem 0;">
+                <div style="background:#121214;border:1px solid #27272a;padding:0.5rem;border-radius:0.5rem;">
+                  <div style="font-size:0.65rem;color:#71717a;">Total Ketukan</div>
+                  <div id="resultTotalChars" style="font-size:1.1rem;font-weight:800;font-family:var(--font-mono);color:#fff;">0</div>
+                </div>
+                <div style="background:#121214;border:1px solid rgba(16,185,129,0.3);padding:0.5rem;border-radius:0.5rem;">
+                  <div style="font-size:0.65rem;color:#10b981;">Benar</div>
+                  <div id="resultCorrectChars" style="font-size:1.1rem;font-weight:800;font-family:var(--font-mono);color:#10b981;">0</div>
+                </div>
+                <div style="background:#121214;border:1px solid rgba(239,68,68,0.3);padding:0.5rem;border-radius:0.5rem;">
+                  <div style="font-size:0.65rem;color:#ef4444;">Salah</div>
+                  <div id="resultIncorrectChars" style="font-size:1.1rem;font-weight:800;font-family:var(--font-mono);color:#ef4444;">0</div>
+                </div>
+              </div>
+              <div class="bento-desc">
+                CPM: <strong id="resultCpm" style="color:#fafafa;font-family:var(--font-mono);">0</strong> Karakter Per Menit
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Aksi Tombol Hasil -->
+        <div class="results-actions">
+          <div style="display:flex;gap:0.75rem;">
+            <button id="btnRepeatTest" class="btn-primary">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"></path>
+              </svg>
+              <span>Ulangi Latihan</span>
+              <span style="font-size:0.65rem;background:#000;color:#fff;padding:0.1rem 0.35rem;border-radius:4px;font-family:var(--font-mono);">Tab + ↵</span>
+            </button>
+
+            <button id="btnNextText" class="btn-secondary">
+              <span>Teks Berikutnya</span>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="9 18 15 12 9 6"></polyline>
+              </svg>
+            </button>
+          </div>
+
+          <div style="display:flex;gap:0.5rem;">
+            <button id="btnExportCsv" class="btn-secondary" title="Unduh Hasil dalam format CSV">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="7 10 12 15 17 10"></polyline>
+                <line x1="12" y1="15" x2="12" y2="3"></line>
+              </svg>
+              <span>Unduh Hasil (CSV)</span>
+            </button>
+
+            <button id="btnCopySummary" class="btn-secondary" title="Salin Ringkasan Nilai">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+              </svg>
+              <span>Salin Ringkasan</span>
+            </button>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+      <div style="display:flex;align-items:center;gap:0.5rem;">
+        <span style="width:7px;height:7px;border-radius:9999px;background:#10b981;"></span>
+        <span>KetikCepat • 100% Client-Side Pure HTML5, CSS3 & Vanilla JS</span>
+      </div>
+      <div>
+        Pintasan: <span class="kbd-hint">Tab</span> + <span class="kbd-hint">Enter</span> untuk restart
+      </div>
+    </footer>
+  </div>
+
+  <!-- Modal Riwayat Latihan -->
+  <div class="modal-backdrop" id="historyModal">
+    <div class="modal-window">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <div style="color:#10b981;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+              <path d="M3 3v5h5"></path><path d="M12 7v5l4 2"></path>
+            </svg>
+          </div>
+          <div>
+            <div class="modal-title">Riwayat Progres Latihan</div>
+            <div class="modal-sub">Tersimpan otomatis di browser (localStorage)</div>
+          </div>
+        </div>
+        <button class="btn-close" id="btnCloseHistory">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <!-- Grafik Batang Tren CSS Flex -->
+        <div class="chart-box">
+          <div class="chart-header">
+            <span>Tren Kecepatan (Net WPM Sesi ke Sesi)</span>
+            <span style="color:#10b981;font-family:var(--font-mono);font-size:0.7rem;">■ WPM</span>
+          </div>
+          <div class="chart-bars-wrap" id="chartBarsWrap"></div>
+        </div>
+
+        <!-- Tabel 10 Sesi Terakhir -->
+        <div>
+          <div style="font-size:0.75rem;font-weight:700;color:#fafafa;margin-bottom:0.5rem;">
+            Daftar 10 Latihan Terakhir
+          </div>
+          <table class="history-table">
+            <thead>
+              <tr>
+                <th>Waktu</th>
+                <th>Judul Teks</th>
+                <th>Kecepatan</th>
+                <th>Akurasi</th>
+              </tr>
+            </thead>
+            <tbody id="historyTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div style="padding:1rem 1.5rem;border-top:1px solid #27272a;display:flex;justify-content:space-between;align-items:center;">
+        <button id="btnClearHistory" style="background:transparent;border:none;color:#ef4444;font-size:0.75rem;cursor:pointer;display:flex;align-items:center;gap:0.35rem;">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="3 6 5 6 21 6"></polyline>
+            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+          </svg>
+          <span>Bersihkan Riwayat</span>
+        </button>
+        <button onclick="document.getElementById('historyModal').classList.remove('open')" class="btn-secondary" style="padding:0.4rem 0.85rem;font-size:0.75rem;">
+          Tutup
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Panduan 10 Jari -->
+  <div class="modal-backdrop" id="infoModal">
+    <div class="modal-window">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <div style="color:#06b6d4;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+              <line x1="12" y1="17" x2="12.01" y2="17"></line>
+            </svg>
+          </div>
+          <div>
+            <div class="modal-title">Panduan Mengetik 10 Jari</div>
+            <div class="modal-sub">Teknik posisi dasar ergonomis untuk kecepatan dan akurasi</div>
+          </div>
+        </div>
+        <button class="btn-close" id="btnCloseInfo">&times;</button>
+      </div>
+
+      <div class="modal-body" style="font-size:0.8rem;color:#d4d4d8;line-height:1.6;">
+        <div style="background:#18181b;border:1px solid #27272a;padding:1rem;border-radius:1rem;">
+          <h4 style="color:#fff;font-weight:700;margin-bottom:0.4rem;">Posisi Baris Dasar (Home Row)</h4>
+          <p style="color:#a1a1aa;font-size:0.75rem;margin-bottom:0.75rem;">
+            Letakkan jari-jari Anda pada tombol berikut sebelum mulai mengetik:
+          </p>
+          <ul style="list-style:none;display:grid;grid-template-columns:1fr 1fr;gap:0.4rem;font-family:var(--font-mono);font-size:0.75rem;">
+            <li><span style="color:#ec4899;">●</span> Kelingking Kiri: <strong>A</strong></li>
+            <li><span style="color:#a855f7;">●</span> Jari Manis Kiri: <strong>S</strong></li>
+            <li><span style="color:#3b82f6;">●</span> Jari Tengah Kiri: <strong>D</strong></li>
+            <li><span style="color:#10b981;">●</span> Telunjuk Kiri: <strong>F</strong> (tonjolan taktil)</li>
+            <li><span style="color:#14b8a6;">●</span> Telunjuk Kanan: <strong>J</strong> (tonjolan taktil)</li>
+            <li><span style="color:#06b6d4;">●</span> Jari Tengah Kanan: <strong>K</strong></li>
+            <li><span style="color:#f59e0b;">●</span> Jari Manis Kanan: <strong>L</strong></li>
+            <li><span style="color:#f43f5e;">●</span> Kelingking Kanan: <strong>;</strong></li>
+            <li style="grid-column:span 2;"><span style="color:#94a3b8;">●</span> Kedua Ibu Jari: <strong>Tombol Spasi</strong></li>
+          </ul>
+        </div>
+
+        <div style="background:#18181b;border:1px solid #27272a;padding:1rem;border-radius:1rem;">
+          <h4 style="color:#fff;font-weight:700;margin-bottom:0.4rem;">Tips Meningkatkan Kecepatan & Akurasi</h4>
+          <p style="color:#a1a1aa;font-size:0.75rem;margin-bottom:0.5rem;">
+            1. <strong>Akurasi adalah fondasi</strong>: Fokus mengetik tanpa salah terlebih dahulu. Kecepatan akan meningkat secara otomatis saat memori otot jari Anda terbentuk.
+          </p>
+          <p style="color:#a1a1aa;font-size:0.75rem;margin-bottom:0.5rem;">
+            2. <strong>Lihat Layar, Bukan Keyboard</strong>: Manfaatkan panduan keyboard virtual interaktif di bawah teks untuk melatih orientasi spasial jari Anda.
+          </p>
+          <p style="color:#a1a1aa;font-size:0.75rem;">
+            3. <strong>Pintasan Tab + Enter</strong>: Tekan tombol Tab lalu Enter untuk mengulang sesi secara cepat tanpa perlu menyentuh mouse.
+          </p>
+        </div>
+      </div>
+
+      <div style="padding:1rem 1.5rem;border-top:1px solid #27272a;display:flex;justify-content:flex-end;">
+        <button onclick="document.getElementById('infoModal').classList.remove('open')" class="btn-primary" style="padding:0.5rem 1rem;font-size:0.8rem;">
+          Saya Mengerti
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Skrip Eksternal Murni (Urutan: Data -> Script) -->
+  <script src="data.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
+
