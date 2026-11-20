@@ -22,11 +22,13 @@ Aplikasi ini berjalan **100% di sisi klien (client-side)** tanpa server, tanpa d
    - Jika sesi berakhir tanpa pengetikan yang valid ($< 5$ karakter), metrik bernilai **NOL (0 WPM, 0% Akurasi, 0% Konsistensi)** dan **TIDAK dimasukkan ke riwayat `localStorage`**.
 3. **Smooth Caret Presisi 100%**:
    - Kursor pengetikan diposisikan langsung di dalam kontainer teks viewport, sejajar presisi dengan tinggi huruf aktif tanpa offset vertikal yang melorot.
-4. **Komponen Visual ReactBits.dev**:
+4. **Latar Belakang Side-Rays Dinamis (ReactBits.dev)**:
+   - Efek pendaran berkas sinar volumetrik WebGL yang bergelombang halus di latar belakang, merespons pergerakan kursor mouse (*mouse tilt*) dengan gradasi warna Emerald & Cyan.
+5. **Komponen Visual ReactBits.dev**:
    - Spotlight Bento Cards dengan pelacak kursor mouse, Blur-Text Reveal, Sliding Pill Glider, dan Animated Number Ticker.
-5. **Panduan 10 Jari Interaktif**:
+6. **Panduan 10 Jari Interaktif**:
    - Keyboard virtual QWERTY dengan 9 zona warna jari dan indikator tombol target.
-6. **Audio Taktil Sintetis (Web Audio API)**:
+7. **Audio Taktil Sintetis (Web Audio API)**:
    - Suara klik sakelar mekanikal (*thocky click*) dan nada error sintetis tanpa berkas audio eksternal.
 
 ---

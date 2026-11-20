@@ -75,6 +75,9 @@ flowchart LR
 #### 5. Animated Number Ticker
 - Perhitungan angka Net WPM, persentase akurasi, dan konsistensi digerakkan menggunakan `requestAnimationFrame` dengan fungsi pelambatan kubik (*cubic ease-out*) selama 1000ms saat layar hasil dibuka.
 
+#### 6. SideRays Dynamic WebGL Background (ReactBits.dev)
+- Latar belakang grafis menggunakan kanvas WebGL shader volumetrik murni tanpa dependensi eksternal. Menghasilkan berkas sinar dinamis dengan warna Emerald (`#10b981`) dan Cyan (`#06b6d4`) yang bergelombang secara sinusoidal dan merespons interaksi koordinat kursor mouse (*mouse tilt*).
+
 ---
 
 ## 4. Bank Korpus Teks Bahasa Indonesia (48 Teks)
