@@ -75,9 +75,11 @@
 
     // Keyboard
     keyboardSection: document.getElementById('keyboardSection'),
+    keyboardContainer: document.getElementById('keyboardContainer'),
     keyboardRowsWrap: document.getElementById('keyboardRowsWrap'),
     fingerHintBadge: document.getElementById('fingerHintBadge'),
     btnToggleKeyboard: document.getElementById('btnToggleKeyboard'),
+    btnToggleKeyboardText: document.getElementById('btnToggleKeyboardText'),
 
     // Results View
     typingSessionView: document.getElementById('typingSessionView'),
@@ -926,12 +928,23 @@
         keyDiv.dataset.key = k.key.toLowerCase();
         if (k.shift) keyDiv.dataset.shift = k.shift;
         if (k.space) keyDiv.dataset.space = 'true';
+        if (k.finger) keyDiv.dataset.finger = k.finger;
 
         const finger = data.fingerInfo[k.finger] || data.fingerInfo.thumbs;
-        keyDiv.style.borderBottomColor = finger.color + '50';
-        keyDiv.style.borderBottomWidth = '2.5px';
+        keyDiv.style.setProperty('--finger-color', finger.color);
+        keyDiv.style.setProperty('--finger-color-alpha', finger.color + '26');
+        keyDiv.style.setProperty('--finger-color-glow', finger.color + '59');
+        keyDiv.style.setProperty('--finger-border', finger.color + '70');
 
-        keyDiv.innerHTML = `<span>${k.label || k.key.toUpperCase()}</span>`;
+        if (k.shift && !k.special && k.key.length === 1 && !k.key.match(/[a-z]/i)) {
+          keyDiv.innerHTML = `
+            <span style="font-size:0.6rem;opacity:0.6;line-height:1;margin-bottom:1px;">${k.shift}</span>
+            <span style="font-size:0.75rem;line-height:1;">${k.label || k.key.toUpperCase()}</span>
+          `;
+        } else {
+          keyDiv.innerHTML = `<span>${k.label || k.key.toUpperCase()}</span>`;
+        }
+
         if (k.tactile) {
           const bump = document.createElement('div');
           bump.className = 'tactile-bump';
@@ -949,7 +962,9 @@
     prevTargets.forEach((k) => k.classList.remove('target'));
 
     if (state.currentIndex >= state.targetText.length) {
-      if (dom.fingerHintBadge) dom.fingerHintBadge.innerHTML = '<span>Selesai!</span>';
+      if (dom.fingerHintBadge) {
+        dom.fingerHintBadge.innerHTML = '<span class="finger-dot"></span><span>Selesai!</span>';
+      }
       return;
     }
 
@@ -957,11 +972,24 @@
     const fingerKey = data.keyToFinger[nextChar] || data.keyToFinger[nextChar.toLowerCase()];
     const finger = fingerKey ? data.fingerInfo[fingerKey] : null;
 
+    // Cek apakah karakter membutuhkan tombol Shift (huruf kapital atau simbol shift)
+    const isShiftRequired = (nextChar !== ' ') && (
+      (nextChar >= 'A' && nextChar <= 'Z') ||
+      ('~!@#$%^&*()_+{}|:"<>?'.includes(nextChar))
+    );
+
     if (finger && dom.fingerHintBadge) {
+      let shiftNote = '';
+      if (isShiftRequired) {
+        const isRightHand = fingerKey && fingerKey.startsWith('right_');
+        const shiftHand = isRightHand ? 'Shift Kiri' : 'Shift Kanan';
+        shiftNote = ` <span style="font-size:0.7rem;color:#a1a1aa;font-weight:500;">(+ ${shiftHand})</span>`;
+      }
+
       dom.fingerHintBadge.innerHTML = `
-        <span class="finger-dot" style="background: ${finger.color}"></span>
-        <span>Gunakan: <strong>${finger.name}</strong></span>
-        <span style="font-family: var(--font-mono); background: #27272a; padding: 0.1rem 0.35rem; border-radius: 4px; color: #fff;">
+        <span class="finger-dot" style="background: ${finger.color}; box-shadow: 0 0 6px ${finger.color}"></span>
+        <span>Gunakan: <strong style="color: ${finger.color}">${finger.name}</strong>${shiftNote}</span>
+        <span style="font-family: var(--font-mono); background: #27272a; padding: 0.1rem 0.4rem; border-radius: 4px; color: #fff; font-weight:700;">
           ${nextChar === ' ' ? 'Spasi' : nextChar}
         </span>
       `;
@@ -973,7 +1001,16 @@
       const isCharMatch =
         keyEl.dataset.key === nextChar.toLowerCase() ||
         keyEl.dataset.shift === nextChar;
-      if (isSpace || isCharMatch) {
+
+      let isTargetShift = false;
+      if (isShiftRequired) {
+        const isRightHand = fingerKey && fingerKey.startsWith('right_');
+        // Gunakan Shift Kiri untuk tombol tangan kanan, Shift Kanan untuk tombol tangan kiri
+        if (isRightHand && keyEl.dataset.key === 'shiftleft') isTargetShift = true;
+        if (!isRightHand && keyEl.dataset.key === 'shiftright') isTargetShift = true;
+      }
+
+      if (isSpace || isCharMatch || isTargetShift) {
         keyEl.classList.add('target');
       }
     });
@@ -1178,16 +1215,26 @@
       updateSoundUI();
     });
 
-    // Toggle Keyboard
-    dom.btnToggleKeyboard.addEventListener('click', () => {
-      state.showKeyboard = !state.showKeyboard;
-      localStorage.setItem('ketikcepat_kb', state.showKeyboard);
-      dom.keyboardSection.style.display = state.showKeyboard ? 'block' : 'none';
-      dom.btnToggleKeyboard.textContent = state.showKeyboard ? 'Sembunyikan' : 'Tampilkan';
-    });
-    if (!state.showKeyboard) {
-      dom.keyboardSection.style.display = 'none';
-      dom.btnToggleKeyboard.textContent = 'Tampilkan';
+    // Toggle Keyboard (Menyembunyikan/menampilkan container keyboard, header & tombol tetap dapat diakses)
+    function applyKeyboardVisibility(visible) {
+      if (dom.keyboardContainer) {
+        dom.keyboardContainer.style.display = visible ? 'flex' : 'none';
+      }
+      const label = visible ? 'Sembunyikan' : 'Tampilkan';
+      if (dom.btnToggleKeyboardText) {
+        dom.btnToggleKeyboardText.textContent = label;
+      } else if (dom.btnToggleKeyboard) {
+        dom.btnToggleKeyboard.textContent = label;
+      }
+    }
+
+    if (dom.btnToggleKeyboard) {
+      dom.btnToggleKeyboard.addEventListener('click', () => {
+        state.showKeyboard = !state.showKeyboard;
+        localStorage.setItem('ketikcepat_kb', state.showKeyboard);
+        applyKeyboardVisibility(state.showKeyboard);
+      });
+      applyKeyboardVisibility(state.showKeyboard);
     }
 
     // Modal Riwayat

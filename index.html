@@ -240,13 +240,19 @@
               </div>
             </div>
 
-            <button id="btnToggleKeyboard"
-              style="background:transparent;border:none;color:#71717a;font-size:0.75rem;cursor:pointer;">
-              Sembunyikan
+            <button id="btnToggleKeyboard" class="btn-toggle-keyboard" title="Tampilkan / Sembunyikan Keyboard Virtual">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect width="20" height="16" x="2" y="4" rx="2" />
+                <path d="M6 8h.01" />
+                <path d="M10 8h.01" />
+                <path d="M14 8h.01" />
+                <path d="M18 8h.01" />
+              </svg>
+              <span id="btnToggleKeyboardText">Sembunyikan</span>
             </button>
           </div>
 
-          <div class="keyboard-container">
+          <div class="keyboard-container" id="keyboardContainer">
             <div id="keyboardRowsWrap"></div>
 
             <!-- Legenda Zona 10 Jari -->
